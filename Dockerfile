@@ -4,9 +4,10 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Giai đoạn 2: Chạy ứng dụng (Sửa lỗi ở đây)
-FROM eclipse-temurin:17-jdk-alpine
+# Giai đoạn 2: Chạy ứng dụng (Dùng bản slim để ổn định hơn)
+FROM openjdk:17-jdk-slim
 WORKDIR /app
+# Lấy file jar từ bước build
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
