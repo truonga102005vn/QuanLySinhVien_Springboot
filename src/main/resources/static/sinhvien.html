@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sinh Viên · Quản Lý Sinh Viên</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;--surface:#0d1120;--card:#111827;
+  --border:#1e2a42;--border2:#2a3a5c;
+  --accent:#3b82f6;--accent2:#06b6d4;
+  --green:#10b981;--red:#ef4444;--warn:#f59e0b;
+  --text:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;
+}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── Navbar ── */
+nav{background:rgba(13,17,32,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;height:64px;position:sticky;top:0;z-index:100;gap:12px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);flex-shrink:0}
+.nav-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.nav-logo-text{font-size:17px;font-weight:700}
+.nav-links{display:flex;gap:4px;margin-left:8px}
+.nav-link{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted2);text-decoration:none;transition:all .2s;border:none;background:none;font-family:inherit;cursor:pointer}
+.nav-link:hover,.nav-link.active{background:rgba(59,130,246,.12);color:var(--accent)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+/* User chip — chỉ hiện khi đã login */
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:5px 14px 5px 5px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.user-avatar img{width:100%;height:100%;object-fit:cover}
+.user-name{font-size:13px;font-weight:500;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase}
+.role-badge.admin{background:rgba(245,158,11,.15);color:var(--warn);border:1px solid rgba(245,158,11,.3)}
+.role-badge.user{background:rgba(59,130,246,.12);color:var(--accent);border:1px solid rgba(59,130,246,.25)}
+.btn-logout{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-logout:hover{background:rgba(239,68,68,.2)}
+
+/* Nút đăng nhập — chỉ hiện khi chưa login */
+.btn-login-nav{padding:8px 20px;border-radius:9px;font-size:13px;font-weight:600;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 3px 12px rgba(59,130,246,.3)}
+.btn-login-nav:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(59,130,246,.4)}
+
+/* ── Hero (chỉ hiện khi chưa login) ── */
+.hero{background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(6,182,212,.04));border-bottom:1px solid var(--border);padding:52px 28px 48px;text-align:center}
+.hero-icon{font-size:58px;margin-bottom:16px}
+.hero-title{font-size:34px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px}
+.hero-sub{font-size:15px;color:var(--muted2);margin-bottom:30px;line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.35)}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(59,130,246,.45)}
+
+/* ── Main ── */
+main{max-width:1140px;margin:0 auto;padding:28px 24px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+.stat-num{font-size:32px;font-weight:700}
+.stat.blue .stat-num{color:var(--accent)}
+.stat.cyan .stat-num{color:var(--accent2)}
+.stat-lbl{font-size:12px;color:var(--muted2);margin-top:4px}
+
+/* toolbar */
+.toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;padding:10px 14px 10px 40px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color .2s}
+.search-wrap input:focus{outline:none;border-color:var(--accent)}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px}
+.btn{padding:10px 18px;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 14px rgba(59,130,246,.3)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-outline{background:var(--card);border:1px solid var(--border);color:var(--muted2)}
+.btn-outline:hover{border-color:var(--border2);color:var(--text)}
+
+/* table */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.table-title{font-size:15px;font-weight:600}
+.count-badge{background:rgba(59,130,246,.12);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead{background:rgba(255,255,255,.02)}
+th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+td{padding:13px 16px;font-size:14px;border-bottom:1px solid rgba(30,42,66,.5)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(59,130,246,.03)}
+.id-pill{display:inline-block;background:rgba(59,130,246,.1);color:var(--accent);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
+.name-cell{font-weight:500}
+.email-a{color:var(--accent2);text-decoration:none;font-size:13px}
+.email-a:hover{text-decoration:underline}
+.creator-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);background:rgba(255,255,255,.04);padding:2px 8px;border-radius:20px}
+.actions{display:flex;gap:6px}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:7px;font-family:inherit;font-weight:600;cursor:pointer;border:1px solid;transition:all .2s}
+.btn-edit{background:rgba(6,182,212,.1);color:var(--accent2);border-color:rgba(6,182,212,.2)}
+.btn-edit:hover{background:rgba(6,182,212,.2)}
+.btn-del{background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.2)}
+.btn-del:hover{background:rgba(239,68,68,.2)}
+.btn-lock{background:rgba(100,116,139,.07);color:var(--muted);border-color:rgba(100,116,139,.15);cursor:default}
+.no-data{padding:60px 20px;text-align:center;color:var(--muted)}
+.no-data-icon{font-size:44px;margin-bottom:12px}
+.no-data p{font-size:14px}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;width:440px;max-width:95vw;transform:scale(.95) translateY(-10px);transition:transform .25s;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.modal-title{font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;border-radius:6px}
+.modal-close:hover{color:var(--text)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field input{width:100%;padding:11px 13px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.field input.err{border-color:var(--red)}
+.field .err-msg{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.btn-cancel{padding:10px 20px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.btn-save{padding:10px 22px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-save:disabled{opacity:.6;cursor:not-allowed}
+
+/* toast */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 18px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(16px);opacity:0;transition:all .3s;z-index:999;max-width:320px;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{border-color:rgba(16,185,129,.35);color:#6ee7b7}
+#toast.err{border-color:rgba(239,68,68,.35);color:#fca5a5}
+#toast.warn{border-color:rgba(245,158,11,.35);color:#fde68a}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav>
+  <a class="nav-logo" href="sinhvien.html">
+    <div class="nav-logo-icon">🎓</div>
+    <div class="nav-logo-text">EduManager</div>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link active" href="sinhvien.html">📋 Sinh Viên</a>
+    <a class="nav-link" href="admin.html" id="admin-link" style="display:none">⚙️ Admin</a>
+  </div>
+  <div class="nav-right">
+    <!-- Hiện khi ĐÃ đăng nhập -->
+    <div id="nav-logged-in" style="display:none;align-items:center;gap:10px">
+      <div class="user-chip">
+        <div class="user-avatar" id="nav-avatar">?</div>
+        <span class="user-name" id="nav-name">...</span>
+        <span class="role-badge" id="nav-role">USER</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Đăng xuất</button>
+    </div>
+    <!-- Hiện khi CHƯA đăng nhập -->
+    <button id="nav-login-btn" class="btn-login-nav" onclick="goLogin()">
+      🔑 Đăng nhập
+    </button>
+  </div>
+</nav>
+
+<!-- ── Hero banner — chỉ hiện khi chưa login ── -->
+<div id="hero" class="hero">
+  <div class="hero-icon">🎓</div>
+  <div class="hero-title">Quản Lý Sinh Viên</div>
+  <div class="hero-sub">Xem toàn bộ danh sách sinh viên bên dưới. Đăng nhập để thêm, sửa hoặc xóa dữ liệu.</div>
+  <button class="hero-cta" onclick="goLogin()">🔑 Đăng nhập ngay</button>
+</div>
+
+<!-- ── Nội dung chính ── -->
+<main>
+  <div class="stats">
+    <div class="stat blue">
+      <div class="stat-num" id="total-sv">—</div>
+      <div class="stat-lbl">Tổng số sinh viên</div>
+    </div>
+    <div class="stat cyan">
+      <div class="stat-num" id="search-result">—</div>
+      <div class="stat-lbl">Kết quả tìm kiếm</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Tìm kiếm theo họ tên hoặc email…"/>
+    </div>
+    <!-- Nút Thêm: CHỈ hiện khi đã đăng nhập -->
+    <button class="btn btn-primary" id="btn-add" style="display:none" onclick="openModal()">
+      ＋ Thêm sinh viên
+    </button>
+    <button class="btn btn-outline" onclick="loadData()">↺ Làm mới</button>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-title">Danh sách sinh viên</span>
+      <span class="count-badge" id="count-badge">0 sinh viên</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Họ tên</th><th>Email</th><th>Người tạo</th><th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ── Modal thêm/sửa ── -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title">Thêm sinh viên mới</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="field">
+      <label>Họ và tên *</label>
+      <input type="text" id="f-hoten" placeholder="Nguyễn Văn A"/>
+      <div class="err-msg" id="err-hoten"></div>
+    </div>
+    <div class="field">
+      <label>Email *</label>
+      <input type="email" id="f-email" placeholder="sv@email.com"/>
+      <div class="err-msg" id="err-email"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Hủy</button>
+      <button class="btn-save" id="save-btn" onclick="save()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://localhost:8080/api/sinhvien';
+let token = null;
+let role  = null;
+let allData = [];
+let editId  = null;
+
+// ─────────────────────────────────────────────────────────────
+// INIT — chạy khi trang load
+// ─────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Nhận token từ OAuth2 redirect
+  const params = new URLSearchParams(location.search);
+  if (params.get('token')) {
+    localStorage.setItem('sv_token',  params.get('token'));
+    localStorage.setItem('sv_name',   decodeURIComponent(params.get('name')   || ''));
+    localStorage.setItem('sv_role',   decodeURIComponent(params.get('role')   || 'USER'));
+    localStorage.setItem('sv_avatar', decodeURIComponent(params.get('avatar') || ''));
+    history.replaceState(null, '', 'sinhvien.html');
+  }
+
+  token = localStorage.getItem('sv_token');
+  role  = localStorage.getItem('sv_role');
+
+  if (token) {
+    setupLoggedIn();
+  } else {
+    setupGuest();
+  }
+
+  // Load dữ liệu công khai — không cần token
+  loadData();
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', e => {
+    clearTimeout(window._searchTimer);
+    window._searchTimer = setTimeout(() => loadData(e.target.value.trim()), 350);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// SETUP UI
+// ─────────────────────────────────────────────────────────────
+function setupLoggedIn() {
+  const name   = localStorage.getItem('sv_name')   || 'User';
+  const avatar = localStorage.getItem('sv_avatar') || '';
+
+  // Navbar: ẩn nút đăng nhập, hiện user chip
+  document.getElementById('nav-login-btn').style.display  = 'none';
+  document.getElementById('nav-logged-in').style.display  = 'flex';
+  document.getElementById('nav-name').textContent = name;
+
+  const roleEl = document.getElementById('nav-role');
+  roleEl.textContent = role || 'USER';
+  roleEl.className   = 'role-badge ' + (role === 'ADMIN' ? 'admin' : 'user');
+
+  const avEl = document.getElementById('nav-avatar');
+  if (avatar) avEl.innerHTML = `<img src="${esc(avatar)}" alt="av"/>`;
+  else        avEl.textContent = name.charAt(0).toUpperCase();
+
+  if (role === 'ADMIN') {
+    document.getElementById('admin-link').style.display = 'flex';
+  }
+
+  // Ẩn hero, hiện nút Thêm
+  document.getElementById('hero').style.display    = 'none';
+  document.getElementById('btn-add').style.display = 'flex';
+}
+
+function setupGuest() {
+  document.getElementById('nav-login-btn').style.display  = 'flex';
+  document.getElementById('nav-logged-in').style.display  = 'none';
+  document.getElementById('hero').style.display           = 'block';
+  document.getElementById('btn-add').style.display        = 'none';
+}
+
+function goLogin() {
+  location.href = 'login.html';
+}
+
+// ─────────────────────────────────────────────────────────────
+// LOAD DATA — public, không cần token
+// ─────────────────────────────────────────────────────────────
+async function loadData(kw = '') {
+  document.getElementById('tbody').innerHTML =
+    `<tr><td colspan="5"><div class="no-data"><div class="no-data-icon">⏳</div><p>Đang tải dữ liệu…</p></div></td></tr>`;
+  try {
+    const url = kw ? `${API}/search?keyword=${encodeURIComponent(kw)}` : API;
+    const res = await fetch(url);  // Không cần Authorization header
+    if (!res.ok) throw new Error('Server lỗi ' + res.status);
+    const data = await res.json();
+    allData = data;
+    render(data);
+    document.getElementById('total-sv').textContent      = kw ? allData.length : data.length;
+    document.getElementById('search-result').textContent = data.length;
+    document.getElementById('count-badge').textContent   = data.length + ' sinh viên';
+  } catch (e) {
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="5"><div class="no-data"><div class="no-data-icon">⚠️</div>
+       <p>Không thể kết nối server<br/><small style="color:var(--muted);font-size:11px">${esc(e.message)}</small></p>
+       </div></td></tr>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────
+function render(list) {
+  const tbody = document.getElementById('tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="no-data"><div class="no-data-icon">📭</div><p>Không có sinh viên nào</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(sv => {
+    const creator = sv.createdBy
+      ? esc(sv.createdBy.fullName || sv.createdBy.username || '—') : '—';
+
+    // Nút thao tác tuỳ theo trạng thái đăng nhập
+    let actions;
+    if (token) {
+      actions = `<button class="btn-sm btn-edit" onclick="openModal(${sv.id})">✏️ Sửa</button>`;
+      if (role === 'ADMIN') {
+        actions += ` <button class="btn-sm btn-del" onclick="del(${sv.id},'${esc(sv.hoTen)}')">🗑️ Xóa</button>`;
+      }
+    } else {
+      // Chưa login: hiện nút mờ, click → chuyển sang login
+      actions = `<button class="btn-sm btn-lock" onclick="goLogin()" title="Đăng nhập để thao tác">🔒 Đăng nhập</button>`;
+    }
+
+    return `<tr>
+      <td><span class="id-pill">#${sv.id}</span></td>
+      <td><span class="name-cell">${esc(sv.hoTen)}</span></td>
+      <td><a class="email-a" href="mailto:${esc(sv.email)}">${esc(sv.email)}</a></td>
+      <td><span class="creator-chip">👤 ${creator}</span></td>
+      <td><div class="actions">${actions}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────────────────
+function openModal(id = null) {
+  // Bảo vệ: nếu chưa login thì chuyển sang trang đăng nhập
+  if (!token) { goLogin(); return; }
+
+  editId = id;
+  clearErrs();
+  if (id) {
+    const sv = allData.find(s => s.id === id);
+    document.getElementById('f-hoten').value = sv?.hoTen || '';
+    document.getElementById('f-email').value = sv?.email || '';
+    document.getElementById('modal-title').textContent = 'Cập nhật sinh viên';
+  } else {
+    document.getElementById('f-hoten').value = '';
+    document.getElementById('f-email').value = '';
+    document.getElementById('modal-title').textContent = 'Thêm sinh viên mới';
+  }
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-hoten').focus(), 80);
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  editId = null;
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+async function save() {
+  clearErrs();
+  const hoTen = document.getElementById('f-hoten').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  let ok = true;
+  if (!hoTen) { setErr('hoten', 'Vui lòng nhập họ tên'); ok = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr('email', 'Email không hợp lệ'); ok = false; }
+  if (!ok) return;
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spin"></span> Đang lưu…';
+
+  const method = editId ? 'PUT'  : 'POST';
+  const url    = editId ? `${API}/${editId}` : API;
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ hoTen, email })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      closeModal();
+      toast('✅ ' + (editId ? 'Cập nhật' : 'Thêm') + ' thành công!', 'ok');
+      loadData(document.getElementById('search-input').value.trim());
+    } else if (res.status === 401) {
+      toast('⚠️ Phiên đăng nhập hết hạn, vui lòng đăng nhập lại', 'warn');
+      logout();
+    } else {
+      const msg = data.error || 'Đã có lỗi xảy ra';
+      if (msg.toLowerCase().includes('email')) setErr('email', msg);
+      else toast('❌ ' + msg, 'err');
+    }
+  } catch { toast('❌ Không thể kết nối server', 'err'); }
+
+  btn.disabled  = false;
+  btn.innerHTML = '💾 Lưu';
+}
+
+// ─────────────────────────────────────────────────────────────
+// DELETE
+// ─────────────────────────────────────────────────────────────
+async function del(id, name) {
+  if (!token) { goLogin(); return; }
+  if (!confirm(`Xóa sinh viên "${name}"?`)) return;
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.ok) {
+      toast('🗑️ Đã xóa thành công', 'ok');
+      loadData(document.getElementById('search-input').value.trim());
+    } else if (res.status === 401) {
+      toast('⚠️ Phiên đăng nhập hết hạn', 'warn');
+      logout();
+    } else {
+      const d = await res.json();
+      toast('❌ ' + (d.error || 'Xóa thất bại'), 'err');
+    }
+  } catch { toast('❌ Không thể kết nối server', 'err'); }
+}
+
+// ─────────────────────────────────────────────────────────────
+// LOGOUT
+// ─────────────────────────────────────────────────────────────
+function logout() {
+  localStorage.clear();
+  token = null;
+  role  = null;
+  setupGuest();
+  render(allData);   // re-render bảng: nút thao tác đổi thành 🔒
+  toast('👋 Đã đăng xuất', 'ok');
+}
+
+// ─────────────────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────────────────
+function setErr(f, msg) {
+  document.getElementById('f-' + f).classList.add('err');
+  const e = document.getElementById('err-' + f);
+  e.textContent = msg; e.style.display = 'block';
+}
+function clearErrs() {
+  ['hoten', 'email'].forEach(f => {
+    document.getElementById('f-' + f).classList.remove('err');
+    const e = document.getElementById('err-' + f);
+    e.textContent = ''; e.style.display = 'none';
+  });
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let _tt;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show ' + type;
+  clearTimeout(_tt); _tt = setTimeout(() => { el.className = ''; }, 3200);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) save();
+});
+</script>
+</body>
+</html>

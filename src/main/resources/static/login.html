@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Đăng Nhập · Quản Lý Sinh Viên</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;--surface:#0d1120;--card:#111827;
+  --border:#1e2a42;--border2:#2a3a5c;
+  --accent:#3b82f6;--accent2:#06b6d4;
+  --green:#10b981;--red:#ef4444;--warn:#f59e0b;
+  --text:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;
+}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bg-mesh{position:fixed;inset:0;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:drift 12s ease-in-out infinite alternate}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,#3b82f6,transparent);top:-150px;left:-100px;animation-duration:14s}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,#06b6d4,transparent);bottom:-100px;right:-80px;animation-duration:10s;animation-delay:-4s}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,#8b5cf6,transparent);top:40%;left:40%;animation-duration:16s;animation-delay:-8s}
+@keyframes drift{to{transform:translate(40px,30px) scale(1.1)}}
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:48px 48px}
+.wrapper{position:relative;z-index:1;width:100%;max-width:460px;padding:20px}
+.card{background:rgba(17,24,39,.85);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:24px;padding:40px 36px;box-shadow:0 0 0 1px rgba(59,130,246,.06),0 40px 80px rgba(0,0,0,.5)}
+.logo-wrap{text-align:center;margin-bottom:32px}
+.logo-icon{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;font-size:26px;margin-bottom:14px;box-shadow:0 8px 24px rgba(59,130,246,.3)}
+.logo-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.logo-sub{font-size:13px;color:var(--muted2);margin-top:4px}
+.tabs{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:28px;gap:4px}
+.tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;transition:all .2s;color:var(--muted2);border:none;background:none;font-family:inherit}
+.tab.active{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(59,130,246,.35)}
+.panel{display:none}
+.panel.active{display:block}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field input{width:100%;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.field input.err{border-color:var(--red)}
+.field .err-msg{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.field .hint{font-size:11px;color:var(--muted);margin-top:4px}
+.forgot{text-align:right;margin-top:-8px;margin-bottom:16px}
+.forgot a{font-size:12px;color:var(--accent2);text-decoration:none;cursor:pointer}
+.forgot a:hover{text-decoration:underline}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(59,130,246,.4)}
+.btn-primary:disabled{opacity:.6;transform:none;cursor:not-allowed}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.oauth-btns{display:flex;gap:10px}
+.oauth-btn{flex:1;padding:11px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.03);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.oauth-btn:hover{border-color:var(--border2);background:rgba(255,255,255,.06);transform:translateY(-1px)}
+.oauth-icon{font-size:18px}
+.switch-text{text-align:center;margin-top:20px;font-size:13px;color:var(--muted2)}
+.switch-text a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none}
+.switch-text a:hover{text-decoration:underline}
+.strength-bar{height:4px;border-radius:4px;background:var(--border);margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;border-radius:4px;transition:all .3s;width:0}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted2);cursor:pointer;margin-bottom:20px;background:none;border:none;font-family:inherit;padding:0}
+.back-btn:hover{color:var(--text)}
+.success-box{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:12px;padding:20px;text-align:center;margin-top:16px}
+.success-icon{font-size:36px;margin-bottom:8px}
+.success-box p{font-size:13px;color:var(--muted2);line-height:1.6}
+#toast{position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(20px);opacity:0;transition:all .3s;z-index:999;max-width:320px;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{border-color:rgba(16,185,129,.4);color:#6ee7b7}
+#toast.err{border-color:rgba(239,68,68,.4);color:#fca5a5}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="bg-grid"></div>
+
+<div class="wrapper">
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-icon">🎓</div>
+      <div class="logo-title">Quản Lý Sinh Viên</div>
+      <div class="logo-sub">Hệ thống quản lý sinh viên trực tuyến</div>
+    </div>
+
+    <div class="tabs" id="tab-bar">
+      <button class="tab active" onclick="switchTab('login')">Đăng nhập</button>
+      <button class="tab" onclick="switchTab('register')">Đăng ký</button>
+    </div>
+
+    <!-- Panel: Đăng nhập -->
+    <div class="panel active" id="panel-login">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="l-email" placeholder="email@example.com" autocomplete="email"/>
+        <div class="err-msg" id="err-l-email"></div>
+      </div>
+      <div class="field">
+        <label>Mật khẩu</label>
+        <input type="password" id="l-password" placeholder="••••••••" autocomplete="current-password"/>
+        <div class="err-msg" id="err-l-password"></div>
+      </div>
+      <div class="forgot"><a onclick="showForgot()">Quên mật khẩu?</a></div>
+      <button class="btn btn-primary" id="login-btn" onclick="doLogin()">Đăng nhập</button>
+      <div class="divider">hoặc tiếp tục với</div>
+      <div class="oauth-btns">
+        <button class="oauth-btn" onclick="oauthLogin('google')"><span class="oauth-icon">🔵</span> Google</button>
+        <button class="oauth-btn" onclick="oauthLogin('facebook')"><span class="oauth-icon">📘</span> Facebook</button>
+      </div>
+    </div>
+
+    <!-- Panel: Đăng ký -->
+    <div class="panel" id="panel-register">
+      <div class="field">
+        <label>Họ và tên</label>
+        <input type="text" id="r-name" placeholder="Nguyễn Văn A"/>
+        <div class="err-msg" id="err-r-name"></div>
+      </div>
+      <div class="field">
+        <label>Tên đăng nhập</label>
+        <input type="text" id="r-username" placeholder="nguyenvana"/>
+        <div class="err-msg" id="err-r-username"></div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="r-email" placeholder="email@example.com"/>
+        <div class="err-msg" id="err-r-email"></div>
+      </div>
+      <div class="field">
+        <label>Mật khẩu</label>
+        <input type="password" id="r-password" placeholder="Tối thiểu 8 ký tự" oninput="checkStrength(this.value)"/>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="hint" id="strength-label">Phải có chữ hoa, chữ thường và số</div>
+        <div class="err-msg" id="err-r-password"></div>
+      </div>
+      <button class="btn btn-primary" id="reg-btn" onclick="doRegister()">Tạo tài khoản</button>
+      <div class="divider">hoặc tiếp tục với</div>
+      <div class="oauth-btns">
+        <button class="oauth-btn" onclick="oauthLogin('google')"><span class="oauth-icon">🔵</span> Google</button>
+        <button class="oauth-btn" onclick="oauthLogin('facebook')"><span class="oauth-icon">📘</span> Facebook</button>
+      </div>
+    </div>
+
+    <!-- Panel: Quên mật khẩu -->
+    <div class="panel" id="panel-forgot">
+      <button class="back-btn" onclick="hideForgot()">← Quay lại đăng nhập</button>
+      <div class="field">
+        <label>Email đã đăng ký</label>
+        <input type="email" id="fp-email" placeholder="email@example.com"/>
+        <div class="err-msg" id="err-fp-email"></div>
+      </div>
+      <button class="btn btn-primary" id="fp-btn" onclick="doForgot()">Gửi link đặt lại mật khẩu</button>
+      <div id="fp-success" style="display:none">
+        <div class="success-box">
+          <div class="success-icon">📬</div>
+          <p>Nếu email <strong id="fp-sent-email"></strong> tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu.<br/>Vui lòng kiểm tra hộp thư (kể cả Spam).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel: Reset mật khẩu -->
+    <div class="panel" id="panel-reset">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:36px">🔐</div>
+        <div style="font-weight:600;margin-top:8px">Đặt lại mật khẩu</div>
+        <div style="font-size:13px;color:var(--muted2);margin-top:4px">Nhập mật khẩu mới của bạn</div>
+      </div>
+      <div class="field">
+        <label>Mật khẩu mới</label>
+        <input type="password" id="rp-password" placeholder="Tối thiểu 8 ký tự"/>
+        <div class="err-msg" id="err-rp-password"></div>
+      </div>
+      <button class="btn btn-primary" id="rp-btn" onclick="doReset()">Đặt lại mật khẩu</button>
+    </div>
+
+    <div class="switch-text" id="switch-hint">
+      Chưa có tài khoản? <a onclick="switchTab('register')">Đăng ký ngay</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://localhost:8080/api/auth';
+let resetToken = null;
+
+// ── Init ──────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // ── FIX 1: Chỉ redirect nếu đã login VÀ không phải đang reset password ──
+  // Bản cũ: nếu có token → redirect ngay → người dùng không thể mở login.html
+  // để đăng nhập tài khoản khác, hoặc bị loop nếu token hết hạn
+  const params = new URLSearchParams(location.search);
+
+  if (params.get('reset')) {
+    // Đang trong flow reset password → không redirect dù có token
+    resetToken = params.get('reset');
+    showPanel('reset');
+    document.getElementById('tab-bar').style.display     = 'none';
+    document.getElementById('switch-hint').style.display = 'none';
+    return;
+  }
+
+  // Nếu đã có token hợp lệ → redirect về trang chính
+  const saved = localStorage.getItem('sv_token');
+  if (saved) {
+    redirect(localStorage.getItem('sv_role'));
+    return;
+  }
+});
+
+function redirect(role) {
+  location.href = (role === 'ADMIN') ? 'admin.html' : 'sinhvien.html';
+}
+
+// ── Tabs ──────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+  });
+  showPanel(tab);
+  document.getElementById('switch-hint').innerHTML = tab === 'login'
+    ? 'Chưa có tài khoản? <a onclick="switchTab(\'register\')">Đăng ký ngay</a>'
+    : 'Đã có tài khoản? <a onclick="switchTab(\'login\')">Đăng nhập</a>';
+}
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function showForgot() {
+  document.getElementById('tab-bar').style.display     = 'none';
+  document.getElementById('switch-hint').style.display = 'none';
+  showPanel('forgot');
+}
+function hideForgot() {
+  document.getElementById('tab-bar').style.display     = 'flex';
+  document.getElementById('switch-hint').style.display = 'block';
+  document.getElementById('fp-success').style.display  = 'none';
+  document.getElementById('fp-btn').style.display      = 'flex';
+  showPanel('login');
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function setErr(id, msg) {
+  const inp = document.getElementById(id);
+  const err = document.getElementById('err-' + id);
+  if (inp) inp.classList.toggle('err', !!msg);
+  if (err) { err.textContent = msg; err.style.display = msg ? 'block' : 'none'; }
+}
+function clearErrs(...ids) { ids.forEach(id => setErr(id, '')); }
+
+function checkStrength(val) {
+  let score = 0;
+  if (val.length >= 8)            score++;
+  if (/[A-Z]/.test(val))         score++;
+  if (/[a-z]/.test(val))         score++;
+  if (/\d/.test(val))            score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const colors = ['#ef4444','#f59e0b','#f59e0b','#10b981','#10b981'];
+  const labels = ['Rất yếu','Yếu','Trung bình','Mạnh','Rất mạnh'];
+  document.getElementById('strength-fill').style.width      = (score * 20) + '%';
+  document.getElementById('strength-fill').style.background = score > 0 ? colors[score-1] : '#ef4444';
+  document.getElementById('strength-label').textContent     = score > 0 ? labels[score-1] : 'Phải có chữ hoa, chữ thường và số';
+}
+
+function setBusy(id, busy, label) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled  = busy;
+  btn.innerHTML = busy ? '<span class="spin"></span> Đang xử lý…' : label;
+}
+
+let toastTimer;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+}
+
+// ── FIX 2: saveAndRedirect lưu đủ thông tin ──────────────
+// Bản cũ của doLogin() chỉ lưu token + role, thiếu sv_name và sv_avatar
+// → navbar sau khi đăng nhập hiện "?" thay vì tên người dùng
+function saveAndRedirect(data) {
+  localStorage.setItem('sv_token',  data.token);
+  localStorage.setItem('sv_email',  data.email        || '');
+  localStorage.setItem('sv_name',   data.fullName     || data.email || 'User');
+  localStorage.setItem('sv_role',   data.role         || 'USER');
+  localStorage.setItem('sv_avatar', data.avatarUrl    || '');
+  redirect(data.role);
+}
+
+// ── Đăng nhập ─────────────────────────────────────────────
+async function doLogin() {
+  clearErrs('l-email', 'l-password');
+  const email    = document.getElementById('l-email').value.trim();
+  const password = document.getElementById('l-password').value;
+
+  if (!email)    { setErr('l-email',    'Vui lòng nhập email'); return; }
+  if (!password) { setErr('l-password', 'Vui lòng nhập mật khẩu'); return; }
+
+  setBusy('login-btn', true, 'Đăng nhập');
+  try {
+    const res  = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      // ── Dùng saveAndRedirect để lưu ĐỦ thông tin ────────
+      saveAndRedirect(data);
+    } else {
+      toast('❌ ' + (data.error || 'Sai email hoặc mật khẩu'), 'err');
+    }
+  } catch {
+    toast('❌ Không thể kết nối server', 'err');
+  }
+  setBusy('login-btn', false, 'Đăng nhập');
+}
+
+// ── Đăng ký ───────────────────────────────────────────────
+async function doRegister() {
+  clearErrs('r-name', 'r-username', 'r-email', 'r-password');
+  const fullName = document.getElementById('r-name').value.trim();
+  const username = document.getElementById('r-username').value.trim();
+  const email    = document.getElementById('r-email').value.trim();
+  const password = document.getElementById('r-password').value;
+  let ok = true;
+  if (!fullName)                       { setErr('r-name',     'Vui lòng nhập họ tên'); ok = false; }
+  if (!username || username.length < 3){ setErr('r-username', 'Tối thiểu 3 ký tự'); ok = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr('r-email', 'Email không hợp lệ'); ok = false; }
+  if (!password || password.length < 8){ setErr('r-password', 'Mật khẩu tối thiểu 8 ký tự'); ok = false; }
+  else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) { setErr('r-password', 'Phải có chữ hoa, chữ thường và số'); ok = false; }
+  if (!ok) return;
+
+  setBusy('reg-btn', true, 'Tạo tài khoản');
+  try {
+    const res  = await fetch(`${API}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password, fullName })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast('✅ Đăng ký thành công! Đang chuyển trang…', 'ok');
+      setTimeout(() => saveAndRedirect(data), 800);
+    } else {
+      toast('❌ ' + (data.error || 'Đăng ký thất bại'), 'err');
+    }
+  } catch { toast('❌ Không thể kết nối server', 'err'); }
+  setBusy('reg-btn', false, 'Tạo tài khoản');
+}
+
+// ── Quên mật khẩu ─────────────────────────────────────────
+async function doForgot() {
+  setErr('fp-email', '');
+  const email = document.getElementById('fp-email').value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setErr('fp-email', 'Email không hợp lệ'); return;
+  }
+  setBusy('fp-btn', true, 'Gửi link đặt lại mật khẩu');
+  try {
+    await fetch(`${API}/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    document.getElementById('fp-sent-email').textContent = email;
+    document.getElementById('fp-success').style.display  = 'block';
+    document.getElementById('fp-btn').style.display      = 'none';
+  } catch { toast('❌ Không thể kết nối server', 'err'); }
+  setBusy('fp-btn', false, 'Gửi link đặt lại mật khẩu');
+}
+
+// ── Reset mật khẩu ────────────────────────────────────────
+async function doReset() {
+  setErr('rp-password', '');
+  const newPassword = document.getElementById('rp-password').value;
+  if (!newPassword || newPassword.length < 8)               { setErr('rp-password', 'Tối thiểu 8 ký tự'); return; }
+  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) { setErr('rp-password', 'Phải có chữ hoa, chữ thường và số'); return; }
+
+  setBusy('rp-btn', true, 'Đặt lại mật khẩu');
+  try {
+    const res  = await fetch(`${API}/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: resetToken, newPassword })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast('✅ Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.', 'ok');
+      setTimeout(() => {
+        localStorage.clear();
+        history.replaceState(null, '', '/login.html');
+        location.reload();
+      }, 1800);
+    } else {
+      toast('❌ ' + (data.error || 'Token không hợp lệ hoặc đã hết hạn'), 'err');
+    }
+  } catch { toast('❌ Không thể kết nối server', 'err'); }
+  setBusy('rp-btn', false, 'Đặt lại mật khẩu');
+}
+
+// ── OAuth2 ────────────────────────────────────────────────
+function oauthLogin(provider) {
+  window.location.href = `http://localhost:8080/api/auth/oauth2/authorize/${provider}`;
+}
+
+// ── Phím tắt ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const activePanel = document.querySelector('.panel.active');
+  if (!activePanel) return;
+  const p = activePanel.id;
+  if (p === 'panel-login')         doLogin();
+  else if (p === 'panel-register') doRegister();
+  else if (p === 'panel-forgot')   doForgot();
+  else if (p === 'panel-reset')    doReset();
+});
+</script>
+</body>
+</html>
