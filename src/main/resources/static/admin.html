@@ -155,7 +155,7 @@ tr:hover td{background:rgba(59,130,246,.025)}
 
   <div class="aside-section">Menu</div>
   <a class="aside-link" href="sinhvien.html"><span class="icon">📋</span> Sinh Viên</a>
-  <a class="aside-link active" href="admin.html"><span class="icon">⚙️</span> Tổng Quan</a>
+  <a class="aside-link active" href="admin.html"><span class="icon"></span> Tổng Quan</a>
 
   <div class="aside-section">Quản lý</div>
   <button class="aside-link" id="link-users" onclick="showSection('users')">
@@ -221,7 +221,7 @@ tr:hover td{background:rgba(59,130,246,.025)}
       </div>
       <div class="search-row">
         <div class="search-wrap">
-          <span class="search-ic">🔍</span>
+          <span class="search-ic"></span>
           <input type="text" id="user-search" placeholder="Tìm theo tên, email…" oninput="filterUsers()"/>
         </div>
         <select class="filter-sel" id="role-filter" onchange="filterUsers()">
@@ -257,7 +257,7 @@ tr:hover td{background:rgba(59,130,246,.025)}
       </div>
       <div class="search-row">
         <div class="search-wrap">
-          <span class="search-ic">🔍</span>
+          <span class="search-ic"></span>
           <input type="text" id="sv-search" placeholder="Tìm theo họ tên, email…" oninput="filterSv()"/>
         </div>
       </div>
@@ -391,7 +391,7 @@ function renderUsers(list) {
     const provCls     = u.provider === 'GOOGLE'   ? 'pb-google'  : u.provider === 'FACEBOOK' ? 'pb-facebook' : 'pb-local';
     const statusCls   = u.enabled  ? 'sb-on' : 'sb-off';
     const statusTxt   = u.enabled  ? '✓ Hoạt động' : '✗ Bị khóa';
-    const toggleLabel = u.enabled  ? '🔒 Khóa' : '🔓 Mở';
+    const toggleLabel = u.enabled  ? 'Khóa' : 'Mở';
     const date        = u.createdAt ? u.createdAt.split('T')[0] : '—';
     return `<tr>
       <td><span class="id-pill">#${u.id}</span></td>
@@ -408,7 +408,7 @@ function renderUsers(list) {
         <button class="ab ab-role"   onclick="openRoleModal(${u.id},'${esc(u.fullName || u.username)}','${u.role}')">🛡️ Role</button>
         <button class="ab ab-toggle" onclick="toggleUser(${u.id})">${toggleLabel}</button>
         <button class="ab ab-pass"   onclick="openPassModal(${u.id},'${esc(u.fullName || u.username)}')">🔐 Pass</button>
-        <button class="ab ab-del"    onclick="deleteUser(${u.id},'${esc(u.fullName || u.username)}')">🗑️</button>
+        <button class="ab ab-del"    onclick="deleteUser(${u.id},'${esc(u.fullName || u.username)}')">Xóa</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -450,7 +450,7 @@ function renderSv(list) {
       <td class="sv-email">${esc(sv.email)}</td>
       <td style="color:var(--muted2);font-size:12px">👤 ${creator}</td>
       <td style="color:var(--muted2);font-size:12px">${date}</td>
-      <td><button class="ab ab-del" onclick="deleteSv(${sv.id},'${esc(sv.hoTen)}')">🗑️ Xóa</button></td>
+      <td><button class="ab ab-del" onclick="deleteSv(${sv.id},'${esc(sv.hoTen)}')">Xóa</button></td>
     </tr>`;
   }).join('');
 }
@@ -465,7 +465,7 @@ function filterSv() {
 async function deleteSv(id, name) {
   if (!confirm(`Xóa sinh viên "${name}"?`)) return;
   const res = await fetch(`${SV_API}/${id}`, { method: 'DELETE', ...h() });
-  if (res.ok) { toast('🗑️ Đã xóa sinh viên', 'ok'); loadSvAdmin(); loadStats(); }
+  if (res.ok) { toast('Đã xóa sinh viên', 'ok'); loadSvAdmin(); loadStats(); }
   else { const d = await res.json(); toast('❌ ' + (d.error || 'Lỗi'), 'err'); }
 }
 
@@ -514,7 +514,7 @@ async function deleteUser(id, name) {
   if (!confirm(`Xóa user "${name}"? Hành động không thể hoàn tác!`)) return;
   const res = await fetch(`${ADMIN_API}/users/${id}`, { method: 'DELETE', ...h() });
   const d   = await res.json();
-  if (res.ok) { toast('🗑️ ' + d.message, 'ok'); loadUsers(); loadStats(); }
+  if (res.ok) { toast(d.message, 'ok'); loadUsers(); loadStats(); }
   else          toast('❌ ' + (d.error || 'Lỗi'), 'err');
 }
 

@@ -140,7 +140,7 @@ tr:hover td{background:rgba(59,130,246,.03)}
   </a>
   <div class="nav-links">
     <a class="nav-link active" href="sinhvien.html">📋 Sinh Viên</a>
-    <a class="nav-link" href="admin.html" id="admin-link" style="display:none">⚙️ Admin</a>
+    <a class="nav-link" href="admin.html" id="admin-link" style="display:none">Admin</a>
   </div>
   <div class="nav-right">
     <!-- Hiện khi ĐÃ đăng nhập -->
@@ -182,7 +182,7 @@ tr:hover td{background:rgba(59,130,246,.03)}
 
   <div class="toolbar">
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"></span>
       <input type="text" id="search-input" placeholder="Tìm kiếm theo họ tên hoặc email…"/>
     </div>
     <!-- Nút Thêm: CHỈ hiện khi đã đăng nhập -->
@@ -252,6 +252,9 @@ window.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('sv_name',   decodeURIComponent(params.get('name')   || ''));
     localStorage.setItem('sv_role',   decodeURIComponent(params.get('role')   || 'USER'));
     localStorage.setItem('sv_avatar', decodeURIComponent(params.get('avatar') || ''));
+    // optional values: email / username (if provided by auth redirect)
+    if (params.get('email')) localStorage.setItem('sv_email', decodeURIComponent(params.get('email')));
+    if (params.get('username')) localStorage.setItem('sv_username', decodeURIComponent(params.get('username')));
     history.replaceState(null, '', 'sinhvien.html');
   }
 
@@ -354,13 +357,24 @@ function render(list) {
     // Nút thao tác tuỳ theo trạng thái đăng nhập
     let actions;
     if (token) {
-      actions = `<button class="btn-sm btn-edit" onclick="openModal(${sv.id})">✏️ Sửa</button>`;
-      if (role === 'ADMIN') {
-        actions += ` <button class="btn-sm btn-del" onclick="del(${sv.id},'${esc(sv.hoTen)}')">🗑️ Xóa</button>`;
+      actions = `<button class="btn-sm btn-edit" onclick="openModal(${sv.id})">Sửa</button>`;
+      const myEmail = localStorage.getItem('sv_email') || '';
+      const myUsername = localStorage.getItem('sv_username') || '';
+      const myName = localStorage.getItem('sv_name') || '';
+      const creatorObj = sv.createdBy || {};
+      const creatorEmail = (creatorObj.email || '').toLowerCase();
+      const creatorUsername = (creatorObj.username || '').toLowerCase();
+      const creatorFull = (creatorObj.fullName || '').toLowerCase();
+      const canDelete = (role === 'ADMIN') ||
+        (myEmail && myEmail.toLowerCase() === creatorEmail) ||
+        (myUsername && myUsername.toLowerCase() === creatorUsername) ||
+        (myName && myName.toLowerCase() === creatorFull);
+      if (canDelete) {
+        actions += ` <button class="btn-sm btn-del" onclick="del(${sv.id},'${esc(sv.hoTen)}')">Xóa</button>`;
       }
     } else {
       // Chưa login: hiện nút mờ, click → chuyển sang login
-      actions = `<button class="btn-sm btn-lock" onclick="goLogin()" title="Đăng nhập để thao tác">🔒 Đăng nhập</button>`;
+      actions = `<button class="btn-sm btn-lock" onclick="goLogin()" title="Đăng nhập để thao tác">Đăng nhập</button>`;
     }
 
     return `<tr>
@@ -457,7 +471,7 @@ async function del(id, name) {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     if (res.ok) {
-      toast('🗑️ Đã xóa thành công', 'ok');
+      toast('Đã xóa thành công', 'ok');
       loadData(document.getElementById('search-input').value.trim());
     } else if (res.status === 401) {
       toast('⚠️ Phiên đăng nhập hết hạn', 'warn');
@@ -477,7 +491,7 @@ function logout() {
   token = null;
   role  = null;
   setupGuest();
-  render(allData);   // re-render bảng: nút thao tác đổi thành 🔒
+  render(allData);   // re-render bảng: nút thao tác đổi thành khóa khi cần
   toast('👋 Đã đăng xuất', 'ok');
 }
 

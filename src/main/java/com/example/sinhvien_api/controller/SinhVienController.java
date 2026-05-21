@@ -1,16 +1,28 @@
 package com.example.sinhvien_api.controller;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.sinhvien_api.model.SinhVien;
 import com.example.sinhvien_api.model.User;
 import com.example.sinhvien_api.repository.UserRepository;
 import com.example.sinhvien_api.service.SinhVienService;
-import jakarta.validation.Valid;
-import org.springframework.http.*;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/sinhvien")
@@ -68,11 +80,34 @@ public class SinhVienController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
+    public ResponseEntity<?> delete(@PathVariable Integer id, Principal principal) {
         try {
-            service.deleteById(id);
-            return ResponseEntity.ok(Map.of("message", "Xóa sinh viên thành công"));
+            if (principal == null) {
+                return ResponseEntity.status(401).body(error("Chưa đăng nhập"));
+            }
+            var me = userRepo.findByEmail(principal.getName()).orElse(null);
+            if (me == null) return ResponseEntity.status(401).body(error("Người dùng không tồn tại"));
+
+            // Admin có quyền xóa mọi bản ghi
+            if (me.getRole() != null && me.getRole().name().equals("ADMIN")) {
+                service.deleteById(id);
+                return ResponseEntity.ok(Map.of("message", "Xóa sinh viên thành công"));
+            }
+
+            // Người tạo có thể xóa bản ghi do mình tạo
+            var opt = service.findById(id);
+            if (opt.isEmpty()) return ResponseEntity.status(404).body(error("Không tìm thấy sinh viên ID: " + id));
+            var sv = opt.get();
+            var creator = sv.getCreatedBy();
+            if (creator != null) {
+                if ((creator.getEmail() != null && creator.getEmail().equalsIgnoreCase(me.getEmail()))
+                        || (creator.getUsername() != null && creator.getUsername().equalsIgnoreCase(me.getUsername()))) {
+                    service.deleteById(id);
+                    return ResponseEntity.ok(Map.of("message", "Xóa sinh viên thành công"));
+                }
+            }
+
+            return ResponseEntity.status(403).body(error("Không có quyền xóa bản ghi này"));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(404).body(error(e.getMessage()));
         }
