@@ -161,7 +161,7 @@ cd sinhvien-api
 - Tạo database QLSinhVien hoặc để ứng dụng tự tạo schema.
 - Nếu muốn, chạy script database/Database_QLSinhvien_API.sql.
 
-### 3. Cấu hình pplication.properties
+### 3. Cấu hình application.properties
 
 `properties
 spring.datasource.url=jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=QLSinhVien;encrypt=true;trustServerCertificate=true
@@ -194,6 +194,18 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 server.port=8080
 app.frontend-url=http://localhost:8080
 `
+
+> **Lưu ý khi deploy trên Render**
+>
+> Render có thể gán biến môi trường `SPRING_DATASOURCE_URL` mặc định cho PostgreSQL nếu bạn dùng database add-on Postgres. Ứng dụng của bạn đang cố gắng sử dụng SQL Server, nên không nên dùng biến `SPRING_DATASOURCE_*` chung của Render.
+>
+> Nếu cần thay đổi chuỗi kết nối SQL Server trên môi trường deploy, hãy dùng:
+>
+> ```properties
+> APP_DATASOURCE_URL=jdbc:sqlserver://your-sql-server-host:1433;databaseName=QLSinhVien;encrypt=true;trustServerCertificate=true
+> APP_DATASOURCE_USERNAME=sa
+> APP_DATASOURCE_PASSWORD=YourPassword
+> ```
 
 ### 4. Chạy ứng dụng
 
